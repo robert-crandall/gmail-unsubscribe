@@ -220,11 +220,18 @@ function unsubscribeThread(args: {
     }
 
     /**
+     * Delete messages from this sender
+     */
+
+    let deletedCount = deleteEmailsFromSender(message.getFrom())
+
+    /**
      * Log to the spreadsheet.
      */
     logToSpreadsheet({
       from: message.getFrom(),
       subject: message.getSubject(),
+      deleted: deletedCount,
       unsubscribeLinkOrEmail: status?.location || "not found",
       view: `=HYPERLINK("${thread.getPermalink()}", "View")`,
       status: status?.summary || "Could not unsubscribe",
@@ -384,6 +391,18 @@ function getUnsubscribeActions(
   return actions.sort((a, b) => getActionPriority(b) - getActionPriority(a));
 }
 
+function deleteEmailsFromSender(
+  senderEmail: string
+) {
+  var threads = GmailApp.search('from:' + senderEmail);
+  let deletedCount = 0; 
+  threads.forEach(function(thread) {
+    thread.moveToTrash();
+    deletedCount++;
+  });
+  return deletedCount;
+}
+
 /**
  * Rank the actions we find on an email. We'll perform the top ranked action found.
  *
@@ -420,6 +439,7 @@ function getActionPriority(action: UnsubscribeAction): number {
 function logToSpreadsheet(args: {
   status: string;
   subject: string;
+  deleted: number;
   view: string;
   from: string;
   unsubscribeLinkOrEmail: string;
@@ -432,6 +452,7 @@ function logToSpreadsheet(args: {
     args.view,
     args.from,
     args.unsubscribeLinkOrEmail,
+    args.deleted,
   ]);
 }
 
@@ -519,7 +540,7 @@ class Config {
   private userProperties = PropertiesService.getUserProperties();
 
   get unsubscribeLabel(): string {
-    return this.userProperties.getProperty("LABEL") || "Unsubscribe";
+    return this.userProperties.getProperty("LABEL") || "Unsubscribe/Unsubscribe";
   }
 
   set unsubscribeLabel(value: string) {
@@ -529,7 +550,7 @@ class Config {
 
   get successLabel(): string {
     return (
-      this.userProperties.getProperty("SUCCESS_LABEL") || "Unsubscribe Success"
+      this.userProperties.getProperty("SUCCESS_LABEL") || "Unsubscribe/Success"
     );
   }
 
@@ -540,7 +561,7 @@ class Config {
 
   get failLabel(): string {
     return (
-      this.userProperties.getProperty("FAIL_LABEL") || "Unsubscribe Failed"
+      this.userProperties.getProperty("FAIL_LABEL") || "Unsubscribe/Failed"
     );
   }
 
