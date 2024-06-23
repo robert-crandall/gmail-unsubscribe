@@ -59,6 +59,20 @@ To deploy the script to your account, run `yarn push` or `npx clasp push`. The f
 
 You can add `--watch` to the push command to push whenever you edit a file.
 
+```
+npm install -g @google/clasp
+clasp login
+yarn install
+npm install
+cp ./personal/.clasp.json .clasp.json
+```
+
+In Google sheets, Extensions, App Script
+Copy the ID from URL to `.clasp.json`
+
+```
+npx clasp push
+```
 ## Credits
 
 The original 2017 version of gmail-unsubscribe was written by Amit Agarwal. Read the original article here: [How to Unsubscribe from Mailing Lists and Junk Newsletters in Gmail](https://www.labnol.org/internet/gmail-unsubscribe/28806/).
